@@ -72,7 +72,7 @@ public class GamePanel extends JPanel implements ActionListener{
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
-            g.setColor(Color.red);
+            g.setColor(Color.white);
             g.setFont(new Font("Ink Free", Font.BOLD, 40));
             FontMetrics metrics = getFontMetrics(g.getFont());
             g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score " + applesEaten))/2, g.getFont().getSize());
@@ -113,6 +113,9 @@ public class GamePanel extends JPanel implements ActionListener{
             case 'L':
                 x[0] = x[0] - UNIT_SIZE;
                 break;
+
+            default:
+            break;
         }
     }
 
@@ -169,7 +172,7 @@ public class GamePanel extends JPanel implements ActionListener{
 
         //Game Over text
 
-        g.setColor(Color.red);
+        g.setColor(Color.white);
         g.setFont(new Font("Ink Free", Font.BOLD, 75));
         FontMetrics metrics = getFontMetrics(g.getFont());
         g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over"))/2, SCREEN_HEIGHT/2 );
@@ -218,7 +221,10 @@ public class GamePanel extends JPanel implements ActionListener{
                     if (direction!= 'U'){
                         direction = 'D';
                     }
-                    break;        
+                    break;   
+                    
+                default:
+                break;
             }
 
         }
