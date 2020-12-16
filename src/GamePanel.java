@@ -1,6 +1,12 @@
 
 import java.awt.*;
 import java.awt.event.*;
+
+import java.io.File;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+
 import javax.swing.*;
 import java.util.Random;
 
@@ -123,6 +129,7 @@ public class GamePanel extends JPanel implements ActionListener{
 
         if ((x[0] == appleX) && (y[0] == appleY)){
 
+            playSound("applebite.wav");
             bodyParts++;
             applesEaten++;
             newApple();
@@ -190,6 +197,31 @@ public class GamePanel extends JPanel implements ActionListener{
         }
         repaint();
 
+    }
+
+    public void playSound(String filepath){
+
+        try{
+
+            File soundPath = new File(filepath);
+
+            if (soundPath.exists()){
+
+                AudioInputStream audioInput = AudioSystem.getAudioInputStream(soundPath);
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioInput);
+                clip.start();
+
+            }
+            else{
+
+                System.out.println("Cannot find file");
+            }
+        }
+        catch (Exception e){
+
+            e.printStackTrace();
+        }
     }
 
     public class MyKeyAdapter extends KeyAdapter{
