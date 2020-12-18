@@ -86,7 +86,7 @@ public class GamePanel extends JPanel implements ActionListener{
             }
 
             //setting the running scoreboard text
-            g.setColor(Color.white);
+            g.setColor(getBackground() == Color.black ? Color.white : Color.black); //if background is black, set text to white, else set to black
             g.setFont(new Font("Ink Free", Font.BOLD, 40));
             FontMetrics metrics = getFontMetrics(g.getFont());
             g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score " + applesEaten))/2, g.getFont().getSize());
@@ -190,7 +190,7 @@ public class GamePanel extends JPanel implements ActionListener{
     public void gameOver(Graphics g){
 
         //Game Over text
-        g.setColor(Color.white);
+        g.setColor(getBackground() == Color.black ? Color.white : Color.black); //if background is black, set text to white, else set to black
         g.setFont(new Font("Ink Free", Font.BOLD, 75));
         FontMetrics metrics = getFontMetrics(g.getFont());
         g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over"))/2, SCREEN_HEIGHT/2 );
@@ -287,6 +287,10 @@ public class GamePanel extends JPanel implements ActionListener{
                     if (direction!= 'U'){
                         direction = 'D';
                     }
+                    break;
+
+                case KeyEvent.VK_L:
+                    setBackground(getBackground() == Color.black ? Color.white : Color.black);
                     break;
 
                 case KeyEvent.VK_Y:
