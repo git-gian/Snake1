@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 import java.io.File;
+import java.security.Key;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -17,12 +19,12 @@ public class GamePanel extends JPanel implements ActionListener{
     static final int UNIT_SIZE = 25;
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
     static final int DELAY = 75;
-    final int x[] = new int[GAME_UNITS];
-    final int y[] = new int[GAME_UNITS];
+    final int x[] = new int[GAME_UNITS]; // x coordinates of the snake body
+    final int y[] = new int[GAME_UNITS]; // y coordinates of the snake body
     int bodyParts = 6;
     int applesEaten;
-    int appleX;
-    int appleY;
+    int appleX; // x coordinate of apple
+    int appleY; // y coordinate of apple
     char direction = 'R';
     boolean running = false;
     Timer timer;
@@ -40,13 +42,13 @@ public class GamePanel extends JPanel implements ActionListener{
 
     public void startGame(){
 
-        newApple();
+        newApple(); //spawn a new apple
         running = true;
         timer = new Timer(DELAY, this);
         timer.start();
     }
 
-    public void paintComponent(Graphics g){
+    public void paintComponent(Graphics g){ //this method is called behind the scenes when the Frame is created, happens after startGame()
         super.paintComponent(g);
         draw(g);
     }
@@ -61,23 +63,29 @@ public class GamePanel extends JPanel implements ActionListener{
                 g.drawLine(0, i*UNIT_SIZE, SCREEN_WIDTH, i*UNIT_SIZE);
             }
             */
+
+            //drawing the apple
             g.setColor(Color.red);
-            g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
+            g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE); //apple is one size unit (square) of the entire grid
             
 
             for (int i = 0; i < bodyParts; i++){
-
+                
+                //head of the snake
                 if (i == 0){
 
                     g.setColor(Color.green);
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
+                //rest of the snake body
                 else{
 
                     g.setColor(new Color(45, 180, 0));
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
+
+            //setting the running scoreboard text
             g.setColor(Color.white);
             g.setFont(new Font("Ink Free", Font.BOLD, 40));
             FontMetrics metrics = getFontMetrics(g.getFont());
@@ -90,18 +98,21 @@ public class GamePanel extends JPanel implements ActionListener{
 
     public void newApple(){
 
+        //set the coordinates for the apple
         appleX = random.nextInt((int)(SCREEN_WIDTH/UNIT_SIZE))*UNIT_SIZE;
         appleY = random.nextInt((int)(SCREEN_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
     }
 
     public void move(){
 
+        //advancing the snake BODY
         for (int i = bodyParts; i > 0; i--){
 
             x[i] = x[i-1];
             y[i] = y[i-1];
         }
 
+        //advancing the snake HEAD
         switch(direction) {
 
             case 'U': 
@@ -127,6 +138,7 @@ public class GamePanel extends JPanel implements ActionListener{
 
     public void checkApple(){
 
+        //if head is touching apple
         if ((x[0] == appleX) && (y[0] == appleY)){
 
             playSound("applebite.wav");
@@ -178,12 +190,16 @@ public class GamePanel extends JPanel implements ActionListener{
     public void gameOver(Graphics g){
 
         //Game Over text
-
         g.setColor(Color.white);
         g.setFont(new Font("Ink Free", Font.BOLD, 75));
         FontMetrics metrics = getFontMetrics(g.getFont());
         g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over"))/2, SCREEN_HEIGHT/2 );
         g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score " + applesEaten))/2, SCREEN_HEIGHT/2 + 100);
+
+        //play again text
+        g.setFont(new Font("Ink Free", Font.BOLD, 25));
+        metrics = getFontMetrics(g.getFont());
+        g.drawString("Play Again? Y / N", (SCREEN_WIDTH - metrics.stringWidth("Play Again? Y / N"))/2, SCREEN_HEIGHT/2 + 200);
     }
 
     @Override
@@ -215,6 +231,7 @@ public class GamePanel extends JPanel implements ActionListener{
             }
             else{
 
+                System.out.println(soundPath.getAbsolutePath());
                 System.out.println("Cannot find file");
             }
         }
@@ -222,6 +239,23 @@ public class GamePanel extends JPanel implements ActionListener{
 
             e.printStackTrace();
         }
+    }
+
+    public void resetGame(){
+
+        //clear snake body
+        for (int i = bodyParts + 1; i >= 0; i--){
+            
+            x[i] = 0;
+            y[i] = 0;
+        }
+
+        //reset game states
+        bodyParts = 6;
+        applesEaten = 0;
+        running = true;
+        direction = 'R';
+        startGame();
     }
 
     public class MyKeyAdapter extends KeyAdapter{
@@ -253,12 +287,25 @@ public class GamePanel extends JPanel implements ActionListener{
                     if (direction!= 'U'){
                         direction = 'D';
                     }
-                    break;   
-                    
+                    break;
+
+                case KeyEvent.VK_Y:
+                    if (!running){
+                        resetGame();
+                    }
+                    break;
+
+                case KeyEvent.VK_N:
+                    if (!running){
+                        JComponent comp = (JComponent) e.getSource(); //Get the source of the action performed (keypressed -> GamePanel)
+                        Window win = SwingUtilities.getWindowAncestor(comp); //Get the window ancestor of comp/GamePanel which is GameFrame
+                        win.dispose(); //can now use JFrame method dispose() to close window
+                    }
+                    break;
+
                 default:
                 break;
             }
-
         }
     }
 }
