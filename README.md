@@ -1,14 +1,6 @@
-## Getting Started
+Recreated the classic game of Snake.
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+Based on Youtuber Bro Code's version of the game.
+Source: https://www.youtube.com/watch?v=bI6e6qjJ8JQ&t=657s
 
-## Folder Structure
-
-The workspace contains two folders by default, where:
-
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
-
-## Dependency Management
-
-The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-pack/blob/master/release-notes/v0.9.0.md#work-with-jar-files-directly).
+I added some features that were not in that video such as "play again" functionality, dark and light mode, and sound when the snake hits the apple
