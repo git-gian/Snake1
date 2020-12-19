@@ -76,7 +76,7 @@ public class GamePanel extends JPanel implements ActionListener{
 
             //spawn mine
             if (isFeverMode){
-
+                
                 g.setColor(Color.gray);
                 g.fillRect(mineX, mineY, UNIT_SIZE, UNIT_SIZE);
             }
@@ -130,7 +130,12 @@ public class GamePanel extends JPanel implements ActionListener{
 
         //set the coordinates for the apple
         if (random.nextInt(10) == 3 && applesEaten > 0){
+
             isAppleGolden = true;
+        }
+        else{
+
+            isAppleGolden = false;
         }
         appleX = random.nextInt((int)(SCREEN_WIDTH/UNIT_SIZE))*UNIT_SIZE;
         appleY = random.nextInt((int)(SCREEN_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
@@ -377,9 +382,10 @@ public class GamePanel extends JPanel implements ActionListener{
                     if (isFeverMode){
                         isFeverMode = false;
                         timer.setDelay(DELAY);
-                        spawnMine();
                     }
                     else{
+                        
+                        spawnMine();
                         isFeverMode = true;
                         timer.setDelay(FEVER_DELAY);
                     }
@@ -401,12 +407,14 @@ public class GamePanel extends JPanel implements ActionListener{
                         isAppleGolden = true;
                     }
                     break;
+
                 case KeyEvent.VK_P:
                     if (timer.isRunning()){
                         timer.stop();
                     }else{
                         timer.start();
                     }
+                    break;
 
                 case KeyEvent.VK_N:
                     if (!running){
