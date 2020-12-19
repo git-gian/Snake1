@@ -19,14 +19,19 @@ public class GamePanel extends JPanel implements ActionListener{
     static final int UNIT_SIZE = 25;
     static final int GAME_UNITS = (SCREEN_WIDTH * SCREEN_HEIGHT) / UNIT_SIZE;
     static final int DELAY = 75;
+    static final int FEVER_DELAY = 45;
     final int x[] = new int[GAME_UNITS]; // x coordinates of the snake body
     final int y[] = new int[GAME_UNITS]; // y coordinates of the snake body
     int bodyParts = 6;
     int applesEaten;
     int appleX; // x coordinate of apple
     int appleY; // y coordinate of apple
+    int mineX; // x coordinate of mine
+    int mineY; // y coordinate of mine
     char direction = 'R';
     boolean running = false;
+    boolean isAppleGolden = false;
+    boolean isFeverMode = false;
     Timer timer;
     Random random;
 
@@ -42,9 +47,14 @@ public class GamePanel extends JPanel implements ActionListener{
 
     public void startGame(){
 
-        newApple(); //spawn a new apple
+        spawnApple(); //spawn a new apple
         running = true;
-        timer = new Timer(DELAY, this);
+        if (isFeverMode){
+            timer = new Timer(FEVER_DELAY, this);
+        }
+        else{
+            timer = new Timer(DELAY, this);
+        }
         timer.start();
     }
 
@@ -64,11 +74,26 @@ public class GamePanel extends JPanel implements ActionListener{
             }
             */
 
-            //drawing the apple
-            g.setColor(Color.red);
-            g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE); //apple is one size unit (square) of the entire grid
-            
+            //spawn mine
+            if (isFeverMode){
 
+                g.setColor(Color.gray);
+                g.fillRect(mineX, mineY, UNIT_SIZE, UNIT_SIZE);
+            }
+
+            //drawing the apple
+            if(isAppleGolden){
+
+                g.setColor(Color.yellow); //golden apples are worth 5 points
+                g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE); //apple is one size unit (square) of the entire grid
+            }
+            else{
+
+                g.setColor(Color.red);
+                g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE); //apple is one size unit (square) of the entire grid
+            }
+
+            //making the snake
             for (int i = 0; i < bodyParts; i++){
                 
                 //head of the snake
@@ -80,14 +105,19 @@ public class GamePanel extends JPanel implements ActionListener{
                 //rest of the snake body
                 else{
 
-                    g.setColor(new Color(45, 180, 0));
+                    if (isFeverMode){
+                        g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255))); //spawn crazy colors!
+                    }
+                    else{
+                        g.setColor(new Color(45, 180, 0));
+                    }
                     g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
                 }
             }
 
             //setting the running scoreboard text
             g.setColor(getBackground() == Color.black ? Color.white : Color.black); //if background is black, set text to white, else set to black
-            g.setFont(new Font("Ink Free", Font.BOLD, 40));
+            g.setFont(new Font("Arial", Font.BOLD, 40));
             FontMetrics metrics = getFontMetrics(g.getFont());
             g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score " + applesEaten))/2, g.getFont().getSize());
         }
@@ -96,11 +126,21 @@ public class GamePanel extends JPanel implements ActionListener{
         }
     }
 
-    public void newApple(){
+    public void spawnApple(){
 
         //set the coordinates for the apple
+        if (random.nextInt(10) == 3 && applesEaten > 0){
+            isAppleGolden = true;
+        }
         appleX = random.nextInt((int)(SCREEN_WIDTH/UNIT_SIZE))*UNIT_SIZE;
         appleY = random.nextInt((int)(SCREEN_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
+    }
+
+    public void spawnMine(){
+
+        //set the coordinates for the mine
+        mineX = random.nextInt((int)(SCREEN_WIDTH/UNIT_SIZE))*UNIT_SIZE;
+        mineY = random.nextInt((int)(SCREEN_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
     }
 
     public void move(){
@@ -140,11 +180,39 @@ public class GamePanel extends JPanel implements ActionListener{
 
         //if head is touching apple
         if ((x[0] == appleX) && (y[0] == appleY)){
+            
+            int soundFileNum = random.nextInt(3);
 
-            playSound("applebite.wav");
-            bodyParts++;
-            applesEaten++;
-            newApple();
+            if (soundFileNum == 0){
+
+                playSound("applebite.wav");
+
+            }else if (soundFileNum == 1){
+
+                playSound("applebite2.wav");
+
+            }else if (soundFileNum == 2){
+
+                playSound("applebite3.wav");
+            }
+
+            if (isAppleGolden){
+                bodyParts = bodyParts + 5;
+                applesEaten = applesEaten + 5;
+                isAppleGolden = false;
+            }else{
+                bodyParts++;
+                applesEaten++;
+            }
+            
+            if (isFeverMode){
+                bodyParts++;
+            }
+
+            spawnApple();
+            if (isFeverMode){
+                spawnMine();
+            }
         }
     }
 
@@ -181,7 +249,14 @@ public class GamePanel extends JPanel implements ActionListener{
                 running = false;
             }
 
+            //checks if head hits mine
+            if ((x[0] == mineX) && (y[0] == mineY)){
+                
+                running = false;
+            }
+
             if (!running){
+                playSound("gameover.wav");
                 timer.stop();
             }
         }
@@ -191,15 +266,17 @@ public class GamePanel extends JPanel implements ActionListener{
 
         //Game Over text
         g.setColor(getBackground() == Color.black ? Color.white : Color.black); //if background is black, set text to white, else set to black
-        g.setFont(new Font("Ink Free", Font.BOLD, 75));
+        g.setFont(new Font("Arial", Font.BOLD, 70));
         FontMetrics metrics = getFontMetrics(g.getFont());
-        g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over"))/2, SCREEN_HEIGHT/2 );
-        g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score " + applesEaten))/2, SCREEN_HEIGHT/2 + 100);
+        g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over"))/2, SCREEN_HEIGHT/2 - 100 );
+        g.drawString("Apples Eaten: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Apples Eaten " + applesEaten))/2, SCREEN_HEIGHT/2);
+        g.drawString("Body Parts: " + bodyParts, (SCREEN_WIDTH - metrics.stringWidth("Body Parts " + bodyParts))/2, SCREEN_HEIGHT/2 + 85);
+
 
         //play again text
-        g.setFont(new Font("Ink Free", Font.BOLD, 25));
+        g.setFont(new Font("Arial", Font.BOLD, 25));
         metrics = getFontMetrics(g.getFont());
-        g.drawString("Play Again? Y / N", (SCREEN_WIDTH - metrics.stringWidth("Play Again? Y / N"))/2, SCREEN_HEIGHT/2 + 200);
+        g.drawString("Play Again? Y / N", (SCREEN_WIDTH - metrics.stringWidth("Play Again? Y / N"))/2, SCREEN_HEIGHT/2 + 150);
     }
 
     @Override
@@ -289,8 +366,28 @@ public class GamePanel extends JPanel implements ActionListener{
                     }
                     break;
 
+                case KeyEvent.VK_F:
+
+                    /* TESTING
+                    JComponent comp = (JComponent) e.getSource(); //Get the source of the action performed (keypressed -> GamePanel)
+                    Window win = SwingUtilities.getWindowAncestor(comp); //Get the window ancestor of comp/GamePanel which is GameFrame
+                    win.setSize(2000, 2000);
+                    win.setLocationRelativeTo(null);
+                    */
+                    if (isFeverMode){
+                        isFeverMode = false;
+                        timer.setDelay(DELAY);
+                        spawnMine();
+                    }
+                    else{
+                        isFeverMode = true;
+                        timer.setDelay(FEVER_DELAY);
+                    }
+                    break;
+
                 case KeyEvent.VK_L:
-                    setBackground(getBackground() == Color.black ? Color.white : Color.black);
+                    setBackground(getBackground() == Color.black ? new Color(237,240,225) : Color.black);
+                    playSound("lightswitch.wav");
                     break;
 
                 case KeyEvent.VK_Y:
@@ -299,14 +396,25 @@ public class GamePanel extends JPanel implements ActionListener{
                     }
                     break;
 
+                case KeyEvent.VK_A:
+                    if (!isAppleGolden){
+                        isAppleGolden = true;
+                    }
+                    break;
+                case KeyEvent.VK_P:
+                    if (timer.isRunning()){
+                        timer.stop();
+                    }else{
+                        timer.start();
+                    }
+
                 case KeyEvent.VK_N:
                     if (!running){
                         JComponent comp = (JComponent) e.getSource(); //Get the source of the action performed (keypressed -> GamePanel)
                         Window win = SwingUtilities.getWindowAncestor(comp); //Get the window ancestor of comp/GamePanel which is GameFrame
-                        win.dispose(); //can now use JFrame method dispose() to close window
+                        win.dispose(); //can now use Window method dispose() to close window
                     }
                     break;
-
                 default:
                 break;
             }
