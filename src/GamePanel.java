@@ -10,6 +10,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
 import javax.swing.*;
+
 import java.util.Random;
 
 public class GamePanel extends JPanel implements ActionListener{
@@ -28,10 +29,12 @@ public class GamePanel extends JPanel implements ActionListener{
     int appleY; // y coordinate of apple
     int mineX; // x coordinate of mine
     int mineY; // y coordinate of mine
+    int highScore = 0;
     char direction = 'R';
     boolean running = false;
     boolean isAppleGolden = false;
     boolean isFeverMode = false;
+    boolean isNewHighScore = false;
     Timer timer;
     Random random;
 
@@ -56,6 +59,7 @@ public class GamePanel extends JPanel implements ActionListener{
             timer = new Timer(DELAY, this);
         }
         timer.start();
+        playSound("newGameSound.wav");
     }
 
     public void paintComponent(Graphics g){ //this method is called behind the scenes when the Frame is created, happens after startGame()
@@ -92,7 +96,7 @@ public class GamePanel extends JPanel implements ActionListener{
                 g.setColor(Color.red);
                 g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE); //apple is one size unit (square) of the entire grid
             }
-
+ 
             //making the snake
             for (int i = 0; i < bodyParts; i++){
                 
@@ -117,9 +121,9 @@ public class GamePanel extends JPanel implements ActionListener{
 
             //setting the running scoreboard text
             g.setColor(getBackground() == Color.black ? Color.white : Color.black); //if background is black, set text to white, else set to black
-            g.setFont(new Font("Arial", Font.BOLD, 40));
+            g.setFont(new Font("Arial", Font.BOLD, 25));
             FontMetrics metrics = getFontMetrics(g.getFont());
-            g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score " + applesEaten))/2, g.getFont().getSize());
+            g.drawString("Score: " + applesEaten + "                High Score: " + highScore, (SCREEN_WIDTH - metrics.stringWidth("Score " + applesEaten + "               High Score: " + highScore))/2, g.getFont().getSize());
         }
         else{
             gameOver(g);
@@ -214,6 +218,11 @@ public class GamePanel extends JPanel implements ActionListener{
                 bodyParts++;
             }
 
+            if ((applesEaten > highScore && highScore != 0) && !isNewHighScore){
+                playSound("newHighScore.wav");
+                isNewHighScore = true;
+            }
+
             spawnApple();
             if (isFeverMode){
                 spawnMine();
@@ -223,46 +232,30 @@ public class GamePanel extends JPanel implements ActionListener{
 
     public void checkCollisions(){
 
+        //check if head collides w/ left, right, top, and bottom borders (respectively)
+        if ((x[0] < 0) || (x[0] > SCREEN_WIDTH) || (y[0] < 0) || (y[0] > SCREEN_HEIGHT)) {
+
+            running = false;
+            playSound("gameover.wav");
+            timer.stop();
+        }
+
+        if (isFeverMode){
+            if ((x[0] == mineX) && (y[0] == mineY)){
+                running = false;
+                playSound("gameover.wav");
+                timer.stop(); 
+            }
+        }
+
         for (int i = bodyParts; i > 0; i--){
 
             //checks if head collided w body
             if ((x[0] == x[i]) && (y[0] == y[i])){
                 running = false;
-            }
-
-            //check if head collides left border
-            if (x[0] < 0){
-                
-                running = false;
-            }
-
-            //check if head collides right border
-            if (x[0] > SCREEN_WIDTH){
-                
-                running = false;
-            }
-
-            //check if head collides top border
-            if (y[0] < 0){
-                
-                running = false;
-            }
-
-            //check if head collides bottom border
-            if (y[0] > SCREEN_HEIGHT){
-                
-                running = false;
-            }
-
-            //checks if head hits mine
-            if ((x[0] == mineX) && (y[0] == mineY)){
-                
-                running = false;
-            }
-
-            if (!running){
                 playSound("gameover.wav");
                 timer.stop();
+                break;
             }
         }
     }
@@ -274,9 +267,18 @@ public class GamePanel extends JPanel implements ActionListener{
         g.setFont(new Font("Arial", Font.BOLD, 70));
         FontMetrics metrics = getFontMetrics(g.getFont());
         g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over"))/2, SCREEN_HEIGHT/2 - 100 );
-        g.drawString("Apples Eaten: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Apples Eaten " + applesEaten))/2, SCREEN_HEIGHT/2);
-        g.drawString("Body Parts: " + bodyParts, (SCREEN_WIDTH - metrics.stringWidth("Body Parts " + bodyParts))/2, SCREEN_HEIGHT/2 + 85);
+        g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score " + applesEaten))/2, SCREEN_HEIGHT/2);
 
+        if (isNewHighScore || highScore == 0){
+
+            highScore = applesEaten;
+            g.drawString("New High Score!", (SCREEN_WIDTH - metrics.stringWidth("New High Score!"))/2, SCREEN_HEIGHT/2 + 85);
+            isNewHighScore = false;
+        }
+        else{
+
+            g.drawString("High Score: " + highScore, (SCREEN_WIDTH - metrics.stringWidth("High Score " + highScore))/2, SCREEN_HEIGHT/2 + 85);
+        }
 
         //play again text
         g.setFont(new Font("Arial", Font.BOLD, 25));
@@ -381,12 +383,14 @@ public class GamePanel extends JPanel implements ActionListener{
                     */
                     if (isFeverMode){
                         isFeverMode = false;
+                        playSound("feverMode.wav");
                         timer.setDelay(DELAY);
                     }
                     else{
                         
                         spawnMine();
                         isFeverMode = true;
+                        playSound("feverMode.wav");
                         timer.setDelay(FEVER_DELAY);
                     }
                     break;
@@ -409,15 +413,17 @@ public class GamePanel extends JPanel implements ActionListener{
                     break;
 
                 case KeyEvent.VK_P:
-                    if (timer.isRunning()){
+                    if (timer.isRunning() && running){
                         timer.stop();
-                    }else{
+                        playSound("pause.wav");
+                    }else if (running){
                         timer.start();
+                        playSound("pause.wav");
                     }
                     break;
 
                 case KeyEvent.VK_N:
-                    if (!running){
+                    if (!running){ //only execute if game is over
                         JComponent comp = (JComponent) e.getSource(); //Get the source of the action performed (keypressed -> GamePanel)
                         Window win = SwingUtilities.getWindowAncestor(comp); //Get the window ancestor of comp/GamePanel which is GameFrame
                         win.dispose(); //can now use Window method dispose() to close window
