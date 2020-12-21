@@ -59,7 +59,7 @@ public class GamePanel extends JPanel implements ActionListener{
             timer = new Timer(DELAY, this);
         }
         timer.start();
-        playSound("newGameSound.wav");
+        playSound("sounds/newGameSound.wav");
     }
 
     public void paintComponent(Graphics g){ //this method is called behind the scenes when the Frame is created, happens after startGame()
@@ -194,15 +194,15 @@ public class GamePanel extends JPanel implements ActionListener{
 
             if (soundFileNum == 0){
 
-                playSound("applebite.wav");
+                playSound("sounds/applebite.wav");
 
             }else if (soundFileNum == 1){
 
-                playSound("applebite2.wav");
+                playSound("sounds/applebite2.wav");
 
             }else if (soundFileNum == 2){
 
-                playSound("applebite3.wav");
+                playSound("sounds/applebite3.wav");
             }
 
             if (isAppleGolden){
@@ -219,7 +219,7 @@ public class GamePanel extends JPanel implements ActionListener{
             }
 
             if ((applesEaten > highScore && highScore != 0) && !isNewHighScore){
-                playSound("newHighScore.wav");
+                playSound("sounds/newHighScore.wav");
                 isNewHighScore = true;
             }
 
@@ -236,14 +236,14 @@ public class GamePanel extends JPanel implements ActionListener{
         if ((x[0] < 0) || (x[0] > SCREEN_WIDTH) || (y[0] < 0) || (y[0] > SCREEN_HEIGHT)) {
 
             running = false;
-            playSound("gameover.wav");
+            playSound("sounds/gameover.wav");
             timer.stop();
         }
 
         if (isFeverMode){
             if ((x[0] == mineX) && (y[0] == mineY)){
                 running = false;
-                playSound("gameover.wav");
+                playSound("sounds/gameover.wav");
                 timer.stop(); 
             }
         }
@@ -253,7 +253,7 @@ public class GamePanel extends JPanel implements ActionListener{
             //checks if head collided w body
             if ((x[0] == x[i]) && (y[0] == y[i])){
                 running = false;
-                playSound("gameover.wav");
+                playSound("sounds/gameover.wav");
                 timer.stop();
                 break;
             }
@@ -383,21 +383,21 @@ public class GamePanel extends JPanel implements ActionListener{
                     */
                     if (isFeverMode){
                         isFeverMode = false;
-                        playSound("feverMode.wav");
+                        playSound("sounds/feverMode.wav");
                         timer.setDelay(DELAY);
                     }
                     else{
                         
                         spawnMine();
                         isFeverMode = true;
-                        playSound("feverMode.wav");
+                        playSound("sounds/feverMode.wav");
                         timer.setDelay(FEVER_DELAY);
                     }
                     break;
 
                 case KeyEvent.VK_L:
                     setBackground(getBackground() == Color.black ? new Color(237,240,225) : Color.black);
-                    playSound("lightswitch.wav");
+                    playSound("sounds/lightswitch.wav");
                     break;
 
                 case KeyEvent.VK_Y:
@@ -415,10 +415,10 @@ public class GamePanel extends JPanel implements ActionListener{
                 case KeyEvent.VK_P:
                     if (timer.isRunning() && running){
                         timer.stop();
-                        playSound("pause.wav");
+                        playSound("sounds/pause.wav");
                     }else if (running){
                         timer.start();
-                        playSound("pause.wav");
+                        playSound("sounds/pause.wav");
                     }
                     break;
 
