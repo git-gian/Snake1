@@ -3,7 +3,6 @@ import java.awt.*;
 import java.awt.event.*;
 
 import java.io.File;
-import java.security.Key;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -141,15 +140,15 @@ public class GamePanel extends JPanel implements ActionListener{
 
             isAppleGolden = false;
         }
-        appleX = random.nextInt((int)(SCREEN_WIDTH/UNIT_SIZE))*UNIT_SIZE;
-        appleY = random.nextInt((int)(SCREEN_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
+        appleX = random.nextInt((SCREEN_WIDTH/UNIT_SIZE))*UNIT_SIZE;
+        appleY = random.nextInt((SCREEN_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
     }
 
     public void spawnMine(){
 
         //set the coordinates for the mine
-        mineX = random.nextInt((int)(SCREEN_WIDTH/UNIT_SIZE))*UNIT_SIZE;
-        mineY = random.nextInt((int)(SCREEN_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
+        mineX = random.nextInt((SCREEN_WIDTH/UNIT_SIZE))*UNIT_SIZE;
+        mineY = random.nextInt((SCREEN_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
     }
 
     public void move(){
