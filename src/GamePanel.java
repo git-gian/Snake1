@@ -213,10 +213,6 @@ public class GamePanel extends JPanel implements ActionListener{
                 applesEaten++;
             }
             
-            if (isFeverMode){
-                bodyParts++;
-            }
-
             if ((applesEaten > highScore && highScore != 0) && !isNewHighScore){
                 playSound("sounds/newHighScore.wav");
                 isNewHighScore = true;
@@ -380,12 +376,12 @@ public class GamePanel extends JPanel implements ActionListener{
                     win.setSize(2000, 2000);
                     win.setLocationRelativeTo(null);
                     */
-                    if (isFeverMode){
+                    if (isFeverMode && timer.isRunning()){
                         isFeverMode = false;
                         playSound("sounds/feverMode.wav");
                         timer.setDelay(DELAY);
                     }
-                    else{
+                    else if (!isFeverMode && timer.isRunning()){
                         
                         spawnMine();
                         isFeverMode = true;
