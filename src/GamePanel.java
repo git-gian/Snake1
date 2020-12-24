@@ -60,7 +60,7 @@ public class GamePanel extends JPanel implements ActionListener{
         timer.start();
         playSound("sounds/newGameSound.wav");
     }
-
+    
     public void paintComponent(Graphics g){ //this method is called behind the scenes when the Frame is created, happens after startGame()
         super.paintComponent(g);
         draw(g);
@@ -188,32 +188,21 @@ public class GamePanel extends JPanel implements ActionListener{
 
         //if head is touching apple
         if ((x[0] == appleX) && (y[0] == appleY)){
-            
-            int soundFileNum = random.nextInt(3);
 
-            if (soundFileNum == 0){
+            playSound("sounds/applebite" + random.nextInt(3) + ".wav");
 
-                playSound("sounds/applebite.wav");
-
-            }else if (soundFileNum == 1){
-
-                playSound("sounds/applebite2.wav");
-
-            }else if (soundFileNum == 2){
-
-                playSound("sounds/applebite3.wav");
-            }
-
+            //if the apple is Golden, add 5 to bodyParts and applesEaten (score), then set isAppleGolden to false to reset golden apple chance
             if (isAppleGolden){
                 bodyParts = bodyParts + 5;
                 applesEaten = applesEaten + 5;
                 isAppleGolden = false;
-            }else{
+            }else{ //if apple is not golden, only add one to bodyParts and applesEaten
                 bodyParts++;
                 applesEaten++;
             }
             
-            if ((applesEaten > highScore && highScore != 0) && !isNewHighScore){
+            //play the new High Score sound when above a new high score
+            if (applesEaten > highScore && !isNewHighScore){
                 playSound("sounds/newHighScore.wav");
                 isNewHighScore = true;
             }
@@ -235,12 +224,10 @@ public class GamePanel extends JPanel implements ActionListener{
             timer.stop();
         }
 
-        if (isFeverMode){
-            if ((x[0] == mineX) && (y[0] == mineY)){
-                running = false;
-                playSound("sounds/gameover.wav");
-                timer.stop(); 
-            }
+        if (isFeverMode && (x[0] == mineX && y[0] == mineY)){
+            running = false;
+            playSound("sounds/gameover.wav");
+            timer.stop(); 
         }
 
         for (int i = bodyParts; i > 0; i--){
@@ -264,7 +251,7 @@ public class GamePanel extends JPanel implements ActionListener{
         g.drawString("Game Over", (SCREEN_WIDTH - metrics.stringWidth("Game Over"))/2, SCREEN_HEIGHT/2 - 100 );
         g.drawString("Score: " + applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score " + applesEaten))/2, SCREEN_HEIGHT/2);
 
-        if (isNewHighScore || highScore == 0){
+        if (isNewHighScore){
 
             highScore = applesEaten;
             g.drawString("New High Score!", (SCREEN_WIDTH - metrics.stringWidth("New High Score!"))/2, SCREEN_HEIGHT/2 + 85);
@@ -345,25 +332,25 @@ public class GamePanel extends JPanel implements ActionListener{
             switch(e.getKeyCode()){
 
                 case KeyEvent.VK_LEFT:
-                    if (direction != 'R'){
+                    if (direction != 'R' && timer.isRunning()){
                         direction = 'L';
                     }
                     break;
 
                 case KeyEvent.VK_RIGHT:
-                    if (direction != 'L'){
+                    if (direction != 'L' && timer.isRunning()){
                         direction = 'R';
                     }
                     break;
 
                 case KeyEvent.VK_UP:
-                    if (direction != 'D'){
+                    if (direction != 'D' && timer.isRunning()){
                         direction = 'U';
                     }
                     break;
 
                 case KeyEvent.VK_DOWN:
-                    if (direction!= 'U'){
+                    if (direction!= 'U' && timer.isRunning()){
                         direction = 'D';
                     }
                     break;
@@ -424,6 +411,7 @@ public class GamePanel extends JPanel implements ActionListener{
                         win.dispose(); //can now use Window method dispose() to close window
                     }
                     break;
+                    
                 default:
                 break;
             }
